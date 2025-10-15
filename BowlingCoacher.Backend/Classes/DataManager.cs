@@ -7,10 +7,6 @@ internal class DataManager (OutcomeStatistics outcomeStatistics, ScoreStatistics
     private ScoreStatistics _scoreStatistics = scoreStatistics;
 
     private static float CalculatePercentage (float part, float whole){
-        if (whole <= 0f){
-            return -1f;
-        }
-
         return part / whole * 100f;
     }
 

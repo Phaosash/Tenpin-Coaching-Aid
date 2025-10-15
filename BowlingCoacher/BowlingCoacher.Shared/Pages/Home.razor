@@ -1,13 +1,28 @@
 ﻿@page "/"
 @using BowlingCoacher.Shared.Services
+@using BowlingCoacher.Shared.Views
 @inject IFormFactor FormFactor
 
-<PageTitle>Home</PageTitle>
+<PageTitle>FrameFocus</PageTitle>
 
-<h1>Bowling Score Sheet</h1>
+<div class="top-row">
+    <h1>FrameFocus</h1>
+</div>
 
+<div style="width:auto; display:inline-flex">
+    <div style="width:33%">
+        <p> @homePageManager.Slogan </p>
+    </div>
 
+    <div style="width:33%; margin:auto;">
+        <p> Current Average: @homePageManager.Average </p>
+    </div>
+</div>
 
 @code {
+	private HomePageManager homePageManager = new HomePageManager();
 
+    protected override async Task OnInitializedAsync (){
+        await homePageManager.InitializeAsync();
+    }
 }
