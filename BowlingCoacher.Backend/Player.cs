@@ -1,4 +1,6 @@
-﻿namespace BowlingCoacher.Backend;
+﻿using BowlingCoacher.Backend.Classes;
+
+namespace BowlingCoacher.Backend;
 
 internal class Player {
     public string Name { get; set; } = string.Empty;

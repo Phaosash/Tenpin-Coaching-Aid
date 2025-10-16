@@ -1,11 +1,11 @@
-﻿namespace BowlingCoacher.Backend;
+﻿namespace BowlingCoacher.Backend.Classes;
 
 internal class Game {
     public List<Frame> Frames { get; set; } = [];
     public DateTime Date { get; set; }
 
-    public int TotalScore => Frames.Sum(f => f.Score);
-    public int MissedSpares => Frames.Count(f => f.IsMissedSpare);
+    public float TotalScore => Frames.Sum(f => f.Score);
+    public float MissedSpares => Frames.Count(f => f.IsOpenFrame);
 }
 
 /*
