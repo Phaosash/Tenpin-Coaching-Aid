@@ -15,10 +15,15 @@ internal class HomePageManager {
     }
 
     public void SubmitScoreForm (){
-        applicationManager.InitialiseScoreStatistics(Statistics.Score, Statistics.Games);
-        applicationManager.SetStrikeValue(Statistics.Strikes);
-        applicationManager.SetSpareValue(Statistics.Spares);
-        applicationManager.SetOpenValue(Statistics.Opens);
+        var passObject = new Tuple<float, float, float, float, float>(
+            Statistics.Score,
+            Statistics.Games,
+            Statistics.Strikes,
+            Statistics.Spares,
+            Statistics.Opens
+        );
+
+        applicationManager.AddStatisticalData(passObject);
         
         CalculateAverage();
         CalculatePercentages();
