@@ -1,21 +1,65 @@
 ﻿@page "/"
+@using BowlingCoacher.Shared.Classes
 @using BowlingCoacher.Shared.Services
-@using BowlingCoacher.Shared.Views
 @inject IFormFactor FormFactor
 
 <PageTitle>FrameFocus</PageTitle>
 
-<div class="top-row">
-    <h1>FrameFocus</h1>
-</div>
+<div style="width: 100%; display:inline-flex;">
+    <div style="width: 25%; padding: 10px;">
+        <EditForm Model="homePageManager" OnValidSubmit="homePageManager.SubmitScoreForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-<div style="width:auto; display:inline-flex">
-    <div style="width:33%">
-        <p> @homePageManager.Slogan </p>
+            <div>
+                <label>Score</label>
+                <InputNumber @bind-Value="homePageManager.Statistics.Score" />
+            </div><br />
+
+            <div>
+                <label>Number of Games</label>
+                <InputNumber @bind-Value="homePageManager.Statistics.Games" />
+            </div><br />
+
+            <div>
+                <label> Number of Strikes </label>
+                <InputNumber @bind-Value="homePageManager.Statistics.Strikes" />
+            </div><br />
+
+            <div>
+                <label> Number of Spares </label>
+                <InputNumber @bind-Value="homePageManager.Statistics.Spares" />
+            </div><br />
+
+            <div>
+                <label> Number of Open Frames </label>
+                <InputNumber @bind-Value="homePageManager.Statistics.Opens" />
+            </div><br />
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </EditForm>
     </div>
 
-    <div style="width:33%; margin:auto;">
-        <p> Current Average: @homePageManager.Average </p>
+    <div style="width: 75%; display: inline-flex;">
+        <div class="statisticsCard">
+            <h4> Current Average </h4>
+            <h5 style="margin-top: 2.5rem;"> @homePageManager.Statistics.Average </h5>
+        </div>
+
+        <div class="statisticsCard">
+            <h4> Strike Percentage </h4>
+            <h5 style="margin-top: 2.5rem;"> @homePageManager.Statistics.StrikePercentage</h5>
+        </div>
+
+        <div class="statisticsCard">
+            <h4> Spare Percentage </h4>
+            <h5 style="margin-top: 2.5rem;"> @homePageManager.Statistics.SparePercentage</h5>
+        </div>
+
+        <div class="statisticsCard">
+            <h4> Open Frame Percentage </h4>
+            <h5 style="margin-top: 2.5rem;"> @homePageManager.Statistics.OpenPercentage</h5>
+        </div>
     </div>
 </div>
 
