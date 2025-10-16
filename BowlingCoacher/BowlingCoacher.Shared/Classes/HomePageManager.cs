@@ -10,8 +10,6 @@ internal class HomePageManager {
 
     private readonly ApplicationManager applicationManager = new();
 
-    public List<ScoreFormObject> ScoreFields { get; set; } = [];
-
     public async Task InitializeAsync (){
         await Task.Delay(500);
     }
