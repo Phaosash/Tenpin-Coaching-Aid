@@ -11,11 +11,11 @@ internal class Player {
     }
 
     public double AverageScore => Games.Average(g => g.TotalScore);
-    public int TotalMissedSpares => Games.Sum(g => g.MissedSpares);
+    //public int TotalMissedSpares => Games.Sum(g => g.MissedSpares);
 
-    public override string ToString (){
-        return $"Player: {Name}, Average Score: {AverageScore:0.00}, Total Missed Spares: {TotalMissedSpares}";
-    }
+    //public override string ToString (){
+    //    return $"Player: {Name}, Average Score: {AverageScore:0.00}, Total Missed Spares: {TotalMissedSpares}";
+    //}
 }
 
 /*

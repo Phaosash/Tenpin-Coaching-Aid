@@ -5,9 +5,24 @@ namespace BowlingCoacher.Backend.Classes;
 internal class DataManager (OutcomeStatistics outcomeStatistics, ScoreStatistics scoreStatistics){
     private OutcomeStatistics _shotStatistics = outcomeStatistics;
     private ScoreStatistics _scoreStatistics = scoreStatistics;
+    private GameStatistics _combinedStatistics = new();
 
     private static float CalculatePercentage (float part, float whole){
         return part / whole * 100f;
+    }
+
+    public void SetStatisticalValues (List<GameStatistics> gameStatistics){
+        foreach (var stat in gameStatistics){
+            _combinedStatistics.Score += stat.Score;
+            _combinedStatistics.Games += stat.Games;
+            _combinedStatistics.Strikes += stat.Strikes;
+            _combinedStatistics.Spares += stat.Spares;
+            _combinedStatistics.Opens += stat.Opens;
+        }
+    }
+
+    private void SetAnalyticsValues (){
+        _shotStatistics.CategoryA = _combinedStatistics.Strikes;
     }
 
     public void SetStatisticsValue (float value, StatCategories frameResults){

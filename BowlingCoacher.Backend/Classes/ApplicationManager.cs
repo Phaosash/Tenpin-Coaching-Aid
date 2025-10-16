@@ -6,9 +6,22 @@ public class ApplicationManager {
     private readonly DataManager _dataManager;
     private OutcomeStatistics _outcomeStatistics;
     private ScoreStatistics _scoreStatistics;
+    private readonly List<GameStatistics> _gameStatistics = [];
 
     public ApplicationManager (){
         _dataManager = new DataManager(_outcomeStatistics, _scoreStatistics);
+    }
+
+    public void AddStatisticalData (Tuple<float, float, float, float, float> values){
+        GameStatistics game = new(){
+            Score = values.Item1,
+            Games = values.Item2,
+            Strikes = values.Item3,
+            Spares = values.Item4,
+            Opens = values.Item5
+        };
+
+        _gameStatistics.Add(game);
     }
 
     public float GetStrikePercentage (){
