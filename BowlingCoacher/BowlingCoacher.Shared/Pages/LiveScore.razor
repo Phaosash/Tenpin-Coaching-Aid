@@ -1,0 +1,53 @@
+﻿@page "/scorer"
+
+<PageTitle>Live Scoring </PageTitle>
+
+<h1>Live Scoring</h1>
+
+<label>Number of Games:</label>
+<input type="number" @bind="numberOfGames" min="1" />
+<button @onclick="GenerateGames">Generate</button>
+
+@if (gameScores.Count > 0)
+{
+    @for (int i = 0; i < numberOfGames; i++)
+    {
+        <GameEntry @key="i" GameNumber="@(i + 1)" OnScoreChanged="(scores) => UpdateGameScores(i, scores)" />
+        <br />
+    }
+
+    <br /><button class="btn btn-primary" @onclick="SubmitScores">Submit Scores</button>
+}
+
+@code {
+    private int numberOfGames = 1;
+    private List<int?[][]> gameScores = new();
+
+    private void GenerateGames() => gameScores = Enumerable.Repeat<int?[][]>(null, numberOfGames).ToList();
+
+    private void UpdateGameScores(int index, int?[][] scores)
+    {
+        if (index < gameScores.Count)
+        {
+            gameScores[index] = scores;
+        }
+    }
+
+    private void SubmitScores()
+    {
+        for (int g = 0; g < gameScores.Count; g++)
+        {
+            Console.WriteLine($"Game {g + 1}:");
+
+            var frames = gameScores[g];
+            if (frames != null)
+            {
+                for (int f = 0; f < frames.Length; f++)
+                {
+                    var shots = string.Join(",", frames[f].Select(s => s?.ToString() ?? "-"));
+                    Console.WriteLine($"  Frame {f + 1}: {shots}");
+                }
+            }
+        }
+    }
+}

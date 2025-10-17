@@ -1,0 +1,208 @@
+﻿@code {
+    // ========== Models ==========
+    public class Shot
+    {
+        public int? PinsKnockedDown { get; set; }
+    }
+
+    public class Frame
+    {
+        public int FrameNumber { get; set; }
+        public List<Shot> Shots { get; set; } = new();
+
+        public bool IsTenthFrame => FrameNumber == 10;
+
+        public Frame(int frameNumber)
+        {
+            FrameNumber = frameNumber;
+            int shotCount = IsTenthFrame ? 3 : 2;
+
+            for (int i = 0; i < shotCount; i++)
+            {
+                Shots.Add(new Shot());
+            }
+        }
+    }
+
+    // ========== Component Params ==========
+    [Parameter] public int GameNumber { get; set; }
+    [Parameter] public EventCallback<int?[][]> OnScoreChanged { get; set; }
+
+    // ========== State ==========
+    private List<Frame> frames = Enumerable.Range(1, 10)
+                                           .Select(i => new Frame(i))
+                                           .ToList();
+
+    private List<int?> frameScores = new();
+
+    protected override void OnInitialized()
+    {
+        frameScores = CalculateScores();
+    }
+
+    // ========== Methods ==========
+    private void UpdateShot(int frameIndex, int shotIndex, ChangeEventArgs e)
+    {
+        if (frameIndex < 0 || frameIndex >= frames.Count)
+            return;
+
+        var frame = frames[frameIndex];
+        if (shotIndex < 0 || shotIndex >= frame.Shots.Count)
+            return;
+
+        if (int.TryParse(e.Value?.ToString(), out int val))
+            frame.Shots[shotIndex].PinsKnockedDown = val;
+        else
+            frame.Shots[shotIndex].PinsKnockedDown = null;
+
+        // Recalculate scores
+        frameScores = CalculateScores();
+
+        // Fire callback
+        var scoreArray = frames
+            .Select(f => f.Shots.Select(s => s.PinsKnockedDown).ToArray())
+            .ToArray();
+
+        OnScoreChanged.InvokeAsync(scoreArray);
+
+        StateHasChanged(); // Force re-render
+    }
+
+    private List<int?> CalculateScores()
+    {
+        var scores = new List<int?>();
+        int cumulativeScore = 0;
+
+        for (int i = 0; i < frames.Count; i++)
+        {
+            var frame = frames[i];
+            var first = frame.Shots.ElementAtOrDefault(0)?.PinsKnockedDown;
+            var second = frame.Shots.ElementAtOrDefault(1)?.PinsKnockedDown;
+            var third = frame.Shots.ElementAtOrDefault(2)?.PinsKnockedDown;
+
+            if (first == null || (i < 9 && second == null))
+            {
+                scores.Add(null);
+                continue;
+            }
+
+            if (i < 9)
+            {
+                if (first == 10) // Strike
+                {
+                    var bonus = GetNextTwoShots(i);
+                    if (bonus.Count < 2 || bonus.Any(b => b == null))
+                    {
+                        scores.Add(null);
+                        continue;
+                    }
+                    cumulativeScore += 10 + bonus[0].Value + bonus[1].Value;
+                }
+                else if (first + second == 10) // Spare
+                {
+                    var bonus = GetNextShot(i);
+                    if (bonus == null)
+                    {
+                        scores.Add(null);
+                        continue;
+                    }
+                    cumulativeScore += 10 + bonus.Value;
+                }
+                else
+                {
+                    cumulativeScore += first.Value + second.Value;
+                }
+            }
+            else // 10th frame
+            {
+                cumulativeScore += first.Value + second.Value + (third ?? 0);
+            }
+
+            scores.Add(cumulativeScore);
+        }
+
+        return scores;
+    }
+
+    private List<int?> GetNextTwoShots(int frameIndex)
+    {
+        var shots = new List<int?>();
+        for (int i = frameIndex + 1; i < frames.Count && shots.Count < 2; i++)
+        {
+            shots.AddRange(frames[i].Shots.Select(s => s.PinsKnockedDown).Where(s => s != null));
+        }
+        return shots.Take(2).ToList();
+    }
+
+    private int? GetNextShot(int frameIndex)
+    {
+        return GetNextTwoShots(frameIndex).FirstOrDefault();
+    }
+}
+
+<div class="bowling-score-sheet">
+    <h4>Game @GameNumber</h4>
+
+    <table class="score-table">
+        <thead>
+            <tr>
+                @for (int i = 1; i <= 10; i++)
+                {
+                    <th>Frame @i</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Input row -->
+            <tr>
+                @for (int frameIndex = 0; frameIndex < frames.Count; frameIndex++)
+                {
+                    <td>
+                        @for (int shotIndex = 0; shotIndex < frames[frameIndex].Shots.Count; shotIndex++)
+                        {
+                            <input type="number"
+                                   min="0" max="10"
+                                   class="shot-input"
+                                   @onchange="(e) => UpdateShot(frameIndex, shotIndex, e)"
+                                   value="@frames[frameIndex].Shots[shotIndex].PinsKnockedDown" />
+                        }
+                    </td>
+                }
+            </tr>
+
+            <!-- Score display row -->
+            <tr>
+                @foreach (var score in frameScores)
+                {
+                    <td>@(score?.ToString() ?? "")</td>
+                }
+            </tr>
+
+            <!-- Placeholder row -->
+            <tr>
+                @for (int i = 0; i < 10; i++)
+                {
+                    <th> Pinfall buttons </th>
+                }
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .score-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+    }
+
+    .score-table th, .score-table td {
+        border: 1px solid #ccc;
+        padding: 4px;
+    }
+
+    .shot-input {
+        width: 45px;
+        margin: 2px;
+    }
+</style>
