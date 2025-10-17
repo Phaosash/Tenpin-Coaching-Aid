@@ -83,10 +83,10 @@
     </div>
 </div>
 
+<div class="statusPanel">
+    <p> @homePageManager.Statistics.UserFeedback </p>
+</div>
+
 @code {
 	private HomePageManager homePageManager = new HomePageManager();
-
-    protected override async Task OnInitializedAsync (){
-        await homePageManager.InitializeAsync();
-    }
 }

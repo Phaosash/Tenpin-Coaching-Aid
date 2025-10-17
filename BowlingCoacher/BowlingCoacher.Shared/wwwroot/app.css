@@ -52,12 +52,12 @@ h1:focus {
     border-color: #929292;
 }
 
-.footer {
+.statusPanel {
     position: fixed;
     bottom: 0;
     width: 100%;
-    text-align: center;
-    font-size: x-small;
+    text-align: left;
+    font-size: 12pt;
 }
 
 .statisticsCard {
