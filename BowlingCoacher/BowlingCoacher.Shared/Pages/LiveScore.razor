@@ -8,11 +8,12 @@
 <input type="number" @bind="numberOfGames" min="1" />
 <button @onclick="GenerateGames">Generate</button>
 
-@if (gameScores.Count > 0)
-{
-    @for (int i = 0; i < numberOfGames; i++)
-    {
-        <GameEntry @key="i" GameNumber="@(i + 1)" OnScoreChanged="(scores) => UpdateGameScores(i, scores)" />
+@if (gameScores.Count > 0){
+    int id = 1;
+
+    @for (int i = 0; i < numberOfGames; i++){
+        <GameEntry Id="id" />
+        id++;
         <br />
     }
 
