@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BowlingCoacher.Shared.DTO\BowlingCoacher.Shared.DTO.csproj" />
-    <ProjectReference Include="..\ErrorLogging\ErrorLogging.csproj" />
-  </ItemGroup>
-
 </Project>

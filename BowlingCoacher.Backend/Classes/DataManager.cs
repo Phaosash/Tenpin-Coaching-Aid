@@ -1,4 +1,5 @@
 ﻿using BowlingCoacher.Backend.DataModels;
+using BowlingCoacher.Shared.DTO;
 using ErrorLogging;
 
 namespace BowlingCoacher.Backend.Classes;

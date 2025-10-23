@@ -7,7 +7,7 @@
 
 <div style="width: 100%; display:inline-flex;">
     <div style="width: 20%; padding: 10px;">
-        <EditForm Model="homePageManager" OnValidSubmit="homePageManager.SubmitScoreForm">
+        <EditForm Model="homePageManager" OnValidSubmit="homePageManager.SubmitScoreFormAsync">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
@@ -41,36 +41,38 @@
     </div>
 
     <div style="width: 80%; height: fit-content;">
+        <h3> Overall  </h3>
         <div style="display: flex;">
             <div class="statisticsCard">
-                <h4> Current Average </h4>
-                <h5 style="margin-top: 2.5rem;"> @homePageManager.Statistics.Average </h5>
+                <h4> Average </h4>
+                <h5 style="margin-top: 4.25rem;"> @homePageManager.CombinedStatistics.Average </h5>
             </div>
 
             <div class="statisticsCard">
                 <h4> Strike Percentage </h4>
-                <h5 style="margin-top: 2.5rem;"> @homePageManager.Statistics.StrikePercentage</h5>
+                <h5 style="margin-top: 2.5rem;"> @homePageManager.CombinedStatistics.StrikePercentage</h5>
             </div>
 
             <div class="statisticsCard">
                 <h4> Spare Percentage </h4>
-                <h5 style="margin-top: 2.5rem;"> @homePageManager.Statistics.SparePercentage</h5>
+                <h5 style="margin-top: 2.5rem;"> @homePageManager.CombinedStatistics.SparePercentage</h5>
             </div>
 
             <div class="statisticsCard">
                 <h4> Open Frame Percentage </h4>
-                <h5 style="margin-top: 2.5rem;"> @homePageManager.Statistics.OpenPercentage</h5>
+                <h5 style="margin-top: 2.5rem;"> @homePageManager.CombinedStatistics.OpenPercentage</h5>
             </div>
         </div>
-        
-        <div style="display: flex;">
+
+        <h3> Last Session </h3>
+        <div style="display:flex">
             <div class="statisticsCard">
-                <h4> Most Recent Average </h4>
-                <h5 style="margin-top: 2.5rem;"> @homePageManager.RecentStatistics.Average </h5>
+                <h4> Average </h4>
+                <h5 style="margin-top: 4.25rem"> @homePageManager.RecentStatistics.Average </h5>
             </div>
 
             <div class="statisticsCard">
-                <h4> Strike Percentage </h4>
+                <h4>  Strike Percentage </h4>
                 <h5 style="margin-top: 2.5rem;"> @homePageManager.RecentStatistics.StrikePercentage</h5>
             </div>
 
@@ -84,11 +86,7 @@
                 <h5 style="margin-top: 2.5rem;"> @homePageManager.RecentStatistics.OpenPercentage</h5>
             </div>
         </div>
-    </div>
-</div>
-
-<div class="statusPanel">
-    <p> @homePageManager.Statistics.UserFeedback </p>
+    </div> 
 </div>
 
 @code {

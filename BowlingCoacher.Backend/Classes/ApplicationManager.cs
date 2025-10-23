@@ -1,18 +1,54 @@
 ﻿using BowlingCoacher.Backend.DataModels;
+using BowlingCoacher.Shared.DTO;
 using ErrorLogging;
-using System.Runtime.Intrinsics.X86;
 
 namespace BowlingCoacher.Backend.Classes;
 
 public class ApplicationManager {
-    private readonly List<GameStatistics> _gameStatistics = [];
-    private GameStatistics _combinedStatistics = new();
-    private GameStatistics _recentStatistics = new();
+    private readonly List<GameStatistics> _gameStatistics;
+    private GameStatistics _combinedStatistics;
+    private GameStatistics _recentStatistics;
+    private readonly ApiClient _client;
+    private static readonly HttpClient _httpClient = new() { BaseAddress = new Uri("https://localhost:7132") };
+
+    public ApplicationManager (){
+        _combinedStatistics = new();
+        _recentStatistics = new();
+        _gameStatistics = [];
+        _client = new ApiClient(_httpClient);
+        _ = InitialiseDataAsync();
+    }
+
+    public static async Task CreateAsync (ApplicationManager manager){
+        await manager.InitialiseDataAsync();
+    }
+
+    private async Task InitialiseDataAsync (){
+        try {
+            var statsFromApi = await _client.GetAllAsync();
+            
+            if (statsFromApi is null || !statsFromApi.Any()){
+                LoggingManager.Instance.LogWarning("No existing statistics found from API.");
+                return;
+            }
+
+            _gameStatistics.Clear();
+
+            foreach (var stat in statsFromApi){
+                _gameStatistics.Add(stat);
+            }
+
+            _recentStatistics = _gameStatistics.OrderByDescending(s => s.Id).First();
+            _combinedStatistics = DataManager.SetStatisticalValues(_gameStatistics);
+        } catch (Exception ex){
+            LoggingManager.Instance.LogError(ex, "Failed to initialise data from API.");
+        }
+    }
 
     //  This method is used to tell the data manager to initialise the statistical data based off the information
     //  supplied throught the Tuple. A Tuple was used as it allows the front end to pass dumb data to the backend
     //  without giving it direct context to the specific DTO's that exist in the backend.
-    public void AddNewStatisticalData (Tuple<float, float, float, float, float> statsObj){
+    public async Task AddNewStatisticalDataAsync (Tuple<float, float, float, float, float> statsObj){
         if (statsObj == null){
             LoggingManager.Instance.LogWarning("Failed to add the new data values, no data object was found.");
             return;
@@ -27,11 +63,19 @@ public class ApplicationManager {
                 Opens = statsObj.Item5
             };
 
-            _gameStatistics.Add(stats);
-            _recentStatistics = stats;
+            var created = await _client.CreateAsync(stats);
+            if (created == null){
+                LoggingManager.Instance.LogWarning("API failed to create the new game statistics entry.");
+                return;
+            }
+
+            _gameStatistics.Add(created);
+            _recentStatistics = created;
             _combinedStatistics = DataManager.SetStatisticalValues(_gameStatistics);
+
+            LoggingManager.Instance.LogInformation($"Added new stats: ID={created.Id}, Score={created.Score}");
         } catch (Exception ex){
-            LoggingManager.Instance.LogError(ex, "Encountered an unexpected problem while attempting to add the new statistical data.");
+            LoggingManager.Instance.LogError(ex, "Encountered an unexpected problem while adding the new statistical data.");
         }
     }
 

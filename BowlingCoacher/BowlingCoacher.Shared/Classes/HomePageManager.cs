@@ -1,19 +1,40 @@
 ﻿using BowlingCoacher.Backend.Classes;
 using BowlingCoacher.Shared.DataObjects;
+using CommunityToolkit.Mvvm.ComponentModel;
 using ErrorLogging;
 
 namespace BowlingCoacher.Shared.Classes;
 
-internal class HomePageManager {
-    public StatisticsObject Statistics { get; set; } = new StatisticsObject();
-    public StatisticsObject RecentStatistics { get; set; } = new StatisticsObject();
+internal partial class HomePageManager: ObservableObject {
+    [ObservableProperty] private StatisticsObject _statistics = new();
+    [ObservableProperty] private DisplayObject _recentStatistics = new();
+    [ObservableProperty] private DisplayObject _combinedStatistics = new();
 
-    private readonly ApplicationManager applicationManager = new();
+    private readonly ApplicationManager applicationManager;
+
+    public HomePageManager (){
+        applicationManager = new ApplicationManager();
+
+        _ = InitialiseDataLoadAsync();
+    }
+
+    private async Task InitialiseDataLoadAsync (){
+        Task task = ApplicationManager.CreateAsync(applicationManager);
+
+        await task;
+
+        if (task.Status == TaskStatus.RanToCompletion){
+            DisplayData();
+        }
+
+        //await ApplicationManager.CreateAsync(applicationManager);
+        //DisplayData();
+    }
 
     //  This method is used to submit the details from the score form to the backend for processing.
     //  It does this by creating a Tuple that matches the backends requested Tuple structure, so that
     //  neither the front end or backend have knowledge of each others specific DTO's.
-    public void SubmitScoreForm (){
+    public async Task SubmitScoreFormAsync (){
         try {
             var passObject = new Tuple<float, float, float, float, float>(
                 Statistics.Score,
@@ -23,15 +44,19 @@ internal class HomePageManager {
                 Statistics.Opens
             );
 
-            applicationManager.AddNewStatisticalData(passObject);
-        
-            DisplayAllTimeAverage();
-            DisplayOverallPercentages();
-            DisplayResentAverage();
-            DisplayResentPercentages();
+            await applicationManager.AddNewStatisticalDataAsync(passObject);
+
+            DisplayData();
         } catch (Exception ex){
             LoggingManager.Instance.LogError(ex, "Encountered an unexpected problem while attempting to submit the score form.");
         }
+    }
+
+    private void DisplayData (){
+        DisplayAllTimeAverage();
+        DisplayOverallPercentages();
+        DisplayResentAverage();
+        DisplayResentPercentages();
     }
 
     //  This method is used to update the DTO component that is used for displaying the average to the user.
@@ -40,11 +65,11 @@ internal class HomePageManager {
             float average = applicationManager.GetOverallAverage();
 
             if (average == -1.0f){
-                Statistics.UserFeedback = "Warning: Failed to get the average. Something went wrong.";
+                CombinedStatistics.UserFeedback = "Warning: Failed to get the average. Something went wrong.";
                 average = 0.0f;
             }
 
-            Statistics.Average = average;
+            CombinedStatistics.Average = average;
         } catch (Exception ex){
             LoggingManager.Instance.LogError(ex, "Failed to display the average something went wrong.");
         }
@@ -53,9 +78,9 @@ internal class HomePageManager {
     //  This method is used to update the DTO components that relate to displaying the percentagges to the user.
     private void DisplayOverallPercentages (){        
         try {
-            Statistics.StrikePercentage = applicationManager.GetOverallStrikePercentage().ToString("n2") + "%";
-            Statistics.SparePercentage = applicationManager.GetOverallSparePercentage().ToString("n2") + "%";
-            Statistics.OpenPercentage = applicationManager.GetOverallOpenPercentage().ToString("n2") + "%";
+            CombinedStatistics.StrikePercentage = applicationManager.GetOverallStrikePercentage().ToString("n2") + "%";
+            CombinedStatistics.SparePercentage = applicationManager.GetOverallSparePercentage().ToString("n2") + "%";
+            CombinedStatistics.OpenPercentage = applicationManager.GetOverallOpenPercentage().ToString("n2") + "%";
         } catch (Exception ex){
             LoggingManager.Instance.LogError(ex, "Failed to update the percentage details for display.");
         }
@@ -66,7 +91,7 @@ internal class HomePageManager {
             float average = applicationManager.GetRecentAverage();
 
             if (average == -1.0f){
-                Statistics.UserFeedback = "Warning: Failed to get the average. Something went wrong.";
+                RecentStatistics.UserFeedback = "Warning: Failed to get the average. Something went wrong.";
                 average = 0.0f;
             }
 

@@ -1,6 +1,7 @@
-﻿namespace BowlingCoacher.Backend.DataModels;
+﻿namespace BowlingCoacher.Shared.DTO;
 
-internal struct GameStatistics {
+public class GameStatistics {
+    public int Id { get; set; }
     public float Score { get; set; }
     public float Games { get; set; }
     public float Strikes { get; set; }

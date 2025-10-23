@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BowlingCoacher.Backend", "B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErrorLogging", "ErrorLogging\ErrorLogging.csproj", "{E0AF327C-9355-4514-9B37-53E06A55D492}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BowlingCoacher.API", "BowlingCoacher.API\BowlingCoacher.API.csproj", "{0D7A4247-DE07-4E5D-BDF6-0A992FCCB1A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BowlingCoacher.Shared.DTO", "BowlingCoacher.Shared.DTO\BowlingCoacher.Shared.DTO.csproj", "{875F295C-BDD0-4C9E-9482-E03112F489E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +44,14 @@ Global
 		{E0AF327C-9355-4514-9B37-53E06A55D492}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0AF327C-9355-4514-9B37-53E06A55D492}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0AF327C-9355-4514-9B37-53E06A55D492}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D7A4247-DE07-4E5D-BDF6-0A992FCCB1A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D7A4247-DE07-4E5D-BDF6-0A992FCCB1A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D7A4247-DE07-4E5D-BDF6-0A992FCCB1A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D7A4247-DE07-4E5D-BDF6-0A992FCCB1A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{875F295C-BDD0-4C9E-9482-E03112F489E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{875F295C-BDD0-4C9E-9482-E03112F489E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{875F295C-BDD0-4C9E-9482-E03112F489E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{875F295C-BDD0-4C9E-9482-E03112F489E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
