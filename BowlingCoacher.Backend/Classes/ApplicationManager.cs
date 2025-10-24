@@ -16,7 +16,6 @@ public class ApplicationManager {
         _recentStatistics = new();
         _gameStatistics = [];
         _client = new ApiClient(_httpClient);
-        _ = InitialiseDataAsync();
     }
 
     public static async Task CreateAsync (ApplicationManager manager){
@@ -27,19 +26,24 @@ public class ApplicationManager {
         try {
             var statsFromApi = await _client.GetAllAsync();
             
-            if (statsFromApi is null || !statsFromApi.Any()){
+            if (statsFromApi is null || !statsFromApi.Any()){              
                 LoggingManager.Instance.LogWarning("No existing statistics found from API.");
-                return;
+
+                GameStatistics empty = new();
+
+                _gameStatistics.Add(empty);
+                _combinedStatistics = DataManager.SetStatisticalValues(_gameStatistics);
+                _recentStatistics = empty;
+            } else {
+                _gameStatistics.Clear();
+
+                foreach (var stat in statsFromApi){
+                    _gameStatistics.Add(stat);
+                }
+
+                _recentStatistics = _gameStatistics.OrderByDescending(s => s.Id).First();
+                _combinedStatistics = DataManager.SetStatisticalValues(_gameStatistics);
             }
-
-            _gameStatistics.Clear();
-
-            foreach (var stat in statsFromApi){
-                _gameStatistics.Add(stat);
-            }
-
-            _recentStatistics = _gameStatistics.OrderByDescending(s => s.Id).First();
-            _combinedStatistics = DataManager.SetStatisticalValues(_gameStatistics);
         } catch (Exception ex){
             LoggingManager.Instance.LogError(ex, "Failed to initialise data from API.");
         }

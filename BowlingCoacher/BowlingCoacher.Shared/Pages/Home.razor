@@ -90,5 +90,10 @@
 </div>
 
 @code {
-	private HomePageManager homePageManager = new HomePageManager();
+    private HomePageManager homePageManager = new HomePageManager();
+
+    protected override async Task OnInitializedAsync (){
+        await homePageManager.InitialiseDataLoadAsync();
+        StateHasChanged();
+    }
 }

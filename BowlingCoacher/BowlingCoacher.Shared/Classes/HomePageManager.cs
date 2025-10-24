@@ -14,21 +14,11 @@ internal partial class HomePageManager: ObservableObject {
 
     public HomePageManager (){
         applicationManager = new ApplicationManager();
-
-        _ = InitialiseDataLoadAsync();
     }
 
-    private async Task InitialiseDataLoadAsync (){
-        Task task = ApplicationManager.CreateAsync(applicationManager);
-
-        await task;
-
-        if (task.Status == TaskStatus.RanToCompletion){
-            DisplayData();
-        }
-
-        //await ApplicationManager.CreateAsync(applicationManager);
-        //DisplayData();
+    public async Task InitialiseDataLoadAsync (){
+        await ApplicationManager.CreateAsync(applicationManager);
+        DisplayData();
     }
 
     //  This method is used to submit the details from the score form to the backend for processing.
