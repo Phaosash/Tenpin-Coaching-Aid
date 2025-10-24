@@ -1,91 +1,113 @@
-﻿using BowlingCoacher.Backend.DataModels;
-using BowlingCoacher.Shared.DTO;
+﻿using BowlingCoacher.Shared.DTO;
 using ErrorLogging;
 
 namespace BowlingCoacher.Backend.Classes;
 
-//  NOTE:   10th Frame only counts as a strike if its the first ball, only count once, regradless of the number of actual strikes.
 internal class DataManager {
-    //  This method is used to calculate the percentage based on teh supplied data. If at any point it encounters a problem,
-    //  or if bad data is provided it will return -1, indicating that an error was encountered.
-    private static float CalculatePercentage (float part, float whole){
-        if (whole <= 0){
-            LoggingManager.Instance.LogWarning("Failed to calculate the most recent percentage, the whole value was invalid.");
-            return -1.0f;
-        }
+    private GameStatistics _totalGameStatistics = new();
+    private GameStatistics _recentGameStatistics = new();
+    private readonly List<GameStatistics> _statisticsList = [];
+    private readonly ApiClient _client;
+    private static readonly HttpClient _httpClient = new() { BaseAddress = new Uri("https://localhost:7132") };
 
+    public DataManager (){
+        _client = new ApiClient(_httpClient);
+    }
+
+    public static async Task LoadDataAsync (DataManager manager){
+        await manager.InitialiseDataAsync();
+    }
+
+    private async Task InitialiseDataAsync (){
         try {
-            float percentage = part / whole * 100;
-            LoggingManager.Instance.LogInformation($"Successfully calculated the percentage as: {percentage} %");
+            var statsFromApi = await _client.GetAllAsync();
 
-            return percentage;
-        } catch (Exception ex){
-            LoggingManager.Instance.LogError(ex, "Encountered an unexpected problem trying to calculate the percentage.");
+            _statisticsList.Clear();
+
+            if (statsFromApi is null || !statsFromApi.Any()){
+                LoggingManager.Instance.LogWarning("No existing statistics found from API.");
+
+                GameStatistics game = new(){
+                    Score = 0.0f,
+                    Games = 0.0f,
+                    Strikes = 0.0f,
+                    Spares = 0.0f,
+                    Opens = 0.0f,
+                };
             
-            return -1.0f;
-        }
-    }
-
-    //  This method is used to to set/initialise the values for the statistical data. It does this by iterating through the
-    //  supplied list of statistical objects, and then stores the combined values into a new object for manipulation else where.
-    public static GameStatistics SetStatisticalValues (List<GameStatistics> gameStatistics){
-        if (gameStatistics == null){
-            LoggingManager.Instance.LogWarning("Failed to set the Statistical values, no data was provided.");
-            return new();
-        }
-        
-        try {
-            GameStatistics statistics = new();
-        
-            foreach (var stat in gameStatistics){
-                statistics.Score += stat.Score;
-                statistics.Games += stat.Games;
-                statistics.Strikes += stat.Strikes;
-                statistics.Spares += stat.Spares;
-                statistics.Opens += stat.Opens;
+                _statisticsList.Add(game);
+                _totalGameStatistics = CreateStatisticsObject(_statisticsList);
+                _recentGameStatistics = _totalGameStatistics;
             }
+            else {
+                foreach (var stat in statsFromApi){
+                    _statisticsList.Add(stat);
+                }
 
-            LoggingManager.Instance.LogInformation("Successfully created new statistical data values.");
-            return statistics;
+                _recentGameStatistics = _statisticsList.OrderByDescending(s => s.Id).First();
+                _totalGameStatistics = CreateStatisticsObject(_statisticsList);
+            }
         } catch (Exception ex){
-            LoggingManager.Instance.LogError(ex, "Encountered an unexpected problem trying to set the statistical valeues.");
-            return new();
+            LoggingManager.Instance.LogError(ex, "");
         }
     }
 
-    //  This method is used dto get the statistical values and returns them to the calling class as a float.
-    //  If an invalid category is provided it returns -1 to indicate an error was encountered.
-    public static float GetStatisticsValue (StatCategories statCategories, GameStatistics statistics){
-        return statCategories switch {
-            StatCategories.Strikes => CalculatePercentage(statistics.Strikes, CalculateNumberOfAttempts(statistics)),
-            StatCategories.Spares => CalculatePercentage(statistics.Spares, CalculateNumberOfAttempts(statistics)),
-            StatCategories.OpenFrames => CalculatePercentage(statistics.Opens, CalculateNumberOfAttempts(statistics)),
-            StatCategories.Average => CalculateAverage(statistics),
-            _ => -1f,
-        };
-    }
-
-    //  This method is used to calculate the average of the data that is supplied. If this somehow breaks, then it will return
-    //  -1 indicating that an error was encountered.
-    private static float CalculateAverage (GameStatistics statistics){
-        try {
-            float average = (float)Math.Round(statistics.Score / statistics.Games, 2);
-            LoggingManager.Instance.LogInformation($"The Average was calculated as being {average}, for the {statistics.Games} games bowled. Based off the combined score of {statistics.Score}");
-
-            return average;
-        } catch (Exception ex){
-            LoggingManager.Instance.LogError(ex, "Encountered an unexpected problem while attempting to calculate the average.");
-            return -1.0f;
+    public GameStatistics GetGameStatisticsValues (bool useRecent){
+        if (useRecent){
+            return _recentGameStatistics;
+        } else {
+            return _totalGameStatistics;
         }
     }
 
-    //  This method is used to calculate the number of attempts taken. If it encounteres a problem then it returns -1 indicating that an error was encountered.
+    public float CalculateAverage (bool useRecent){
+        if (useRecent){
+            return GetAverage(_recentGameStatistics.Score, _recentGameStatistics.Games);
+        } else {
+            return GetAverage(_totalGameStatistics.Score, _totalGameStatistics.Games);
+        }
+    }
+
+    public float CalculateStrikePercentage (bool useRecent){
+        if (useRecent){
+            return GetPercentage(_recentGameStatistics.Strikes, CalculateNumberOfAttempts(_recentGameStatistics));
+        } else {
+            return GetPercentage(_totalGameStatistics.Strikes, CalculateNumberOfAttempts(_totalGameStatistics));
+        }
+    }
+    
+    public float CalculateSparePercentage (bool useRecent){
+        if (useRecent){
+            return GetPercentage(_recentGameStatistics.Spares, CalculateNumberOfAttempts(_recentGameStatistics));
+        } else {
+            return GetPercentage(_totalGameStatistics.Spares, CalculateNumberOfAttempts(_totalGameStatistics));
+        }
+    }
+
+    public float CalculateOpenPercentage (bool useRecent){
+        if (useRecent){
+            return GetPercentage(_recentGameStatistics.Opens, CalculateNumberOfAttempts(_recentGameStatistics));
+        } else {
+            return GetPercentage(_totalGameStatistics.Opens, CalculateNumberOfAttempts(_totalGameStatistics));
+        }
+    }
+
+    private static float GetPercentage (float part, float total){
+        return DataProcessor.CalculatePercentage(part, total);
+    }
+    
+    private static GameStatistics CreateStatisticsObject (List<GameStatistics> gameStatistics){
+        return DataProcessor.GetStatisticsObjectValue(gameStatistics);
+    }
+
+    private static float GetAverage (float score, float numGames){
+        return DataProcessor.CalculateAverage(score, numGames);
+    }
+
+    //  This method is used to calculate the number of attempts taken.
     private static float CalculateNumberOfAttempts (GameStatistics statistics){
         try {
-            float numberOfAttempts = statistics.Strikes + statistics.Spares + statistics.Opens;
-            LoggingManager.Instance.LogInformation($"Successfully calculated the number of attempts as: {numberOfAttempts}.");
-
-            return numberOfAttempts;
+            return statistics.Strikes + statistics.Spares + statistics.Opens;
         } catch (Exception ex){
             LoggingManager.Instance.LogError(ex, "Failed to calculate the number of attempts something went wrong.");
             return -1.0f;

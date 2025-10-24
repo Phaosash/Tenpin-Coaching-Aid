@@ -1,14 +1,13 @@
 ﻿using BowlingCoacher.Backend.Classes;
 using BowlingCoacher.Shared.DataObjects;
-using CommunityToolkit.Mvvm.ComponentModel;
 using ErrorLogging;
 
 namespace BowlingCoacher.Shared.Classes;
 
-internal partial class HomePageManager: ObservableObject {
-    [ObservableProperty] private StatisticsObject _statistics = new();
-    [ObservableProperty] private DisplayObject _recentStatistics = new();
-    [ObservableProperty] private DisplayObject _combinedStatistics = new();
+internal class HomePageManager {
+    public StatisticsObject Statistics { get; set; } = new();
+    public DisplayObject RecentStatistics { get; set; } = new();
+    public DisplayObject CombinedStatistics { get; set; } = new();
 
     private readonly ApplicationManager applicationManager;
 
@@ -16,6 +15,7 @@ internal partial class HomePageManager: ObservableObject {
         applicationManager = new ApplicationManager();
     }
 
+    //  This method is used to initialise the loading of the application on the backend.
     public async Task InitialiseDataLoadAsync (){
         await ApplicationManager.CreateAsync(applicationManager);
         DisplayData();
@@ -42,6 +42,7 @@ internal partial class HomePageManager: ObservableObject {
         }
     }
 
+    //  This method is used to simply call the methods to update the different parts of the UI.
     private void DisplayData (){
         DisplayAllTimeAverage();
         DisplayOverallPercentages();
@@ -76,6 +77,8 @@ internal partial class HomePageManager: ObservableObject {
         }
     }
 
+    //  This method is used to get the average from the backend, and return it to the front end for display.
+    //  If something goes wrong while calculating the average, it should display a value of zero to the user.
     private void DisplayResentAverage (){
         try {
             float average = applicationManager.GetRecentAverage();
@@ -91,6 +94,8 @@ internal partial class HomePageManager: ObservableObject {
         }
     }
 
+    //  This method is used to display the most recent data to the user by pulling the relevent data from the backend.
+    //  It achives this by setting the values of the DTO to the data from the backend.
     private void DisplayResentPercentages (){
         try {
             RecentStatistics.StrikePercentage = applicationManager.GetRecentStrikePercentage().ToString("n2") + "%";

@@ -6,6 +6,10 @@
 
 <label>Number of Games:</label>
 <input type="number" @bind="numberOfGames" min="1" />
+
+<label> Date </label>
+<input type="date" />
+
 <button @onclick="GenerateGames">Generate</button>
 
 @if (gameScores.Count > 0){
@@ -26,29 +30,7 @@
 
     private void GenerateGames() => gameScores = Enumerable.Repeat<int?[][]>(null, numberOfGames).ToList();
 
-    private void UpdateGameScores(int index, int?[][] scores)
-    {
-        if (index < gameScores.Count)
-        {
-            gameScores[index] = scores;
-        }
-    }
+    private void UpdateGameScores (){ }
 
-    private void SubmitScores()
-    {
-        for (int g = 0; g < gameScores.Count; g++)
-        {
-            Console.WriteLine($"Game {g + 1}:");
-
-            var frames = gameScores[g];
-            if (frames != null)
-            {
-                for (int f = 0; f < frames.Length; f++)
-                {
-                    var shots = string.Join(",", frames[f].Select(s => s?.ToString() ?? "-"));
-                    Console.WriteLine($"  Frame {f + 1}: {shots}");
-                }
-            }
-        }
-    }
+    private void SubmitScores (){ }
 }

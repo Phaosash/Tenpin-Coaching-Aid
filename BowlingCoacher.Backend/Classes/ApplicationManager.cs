@@ -11,6 +11,7 @@ public class ApplicationManager {
     private readonly ApiClient _client;
     private static readonly HttpClient _httpClient = new() { BaseAddress = new Uri("https://localhost:7132") };
 
+    //  This constructor is is to initialise some of the variables.
     public ApplicationManager (){
         _combinedStatistics = new();
         _recentStatistics = new();
@@ -18,10 +19,15 @@ public class ApplicationManager {
         _client = new ApiClient(_httpClient);
     }
 
+    //  This method is used to start the initialisation of the data, tried calling from the constructor,
+    //  But it wasnt working as intended, and had issues with the async call when done this way.
     public static async Task CreateAsync (ApplicationManager manager){
         await manager.InitialiseDataAsync();
     }
 
+    //  This method is used to asyncrhonously initialise the data through an API call.
+    //  If no data is returned the it will initialise the values as zero to help prevent/avoid
+    //  unexpected errors/issues. Otherwise it sets the data based on what was returned from the API.
     private async Task InitialiseDataAsync (){
         try {
             var statsFromApi = await _client.GetAllAsync();
@@ -68,6 +74,7 @@ public class ApplicationManager {
             };
 
             var created = await _client.CreateAsync(stats);
+            
             if (created == null){
                 LoggingManager.Instance.LogWarning("API failed to create the new game statistics entry.");
                 return;
@@ -103,19 +110,22 @@ public class ApplicationManager {
         return GetDataValue(StatCategories.Average, _combinedStatistics);
     }
 
-    //  This method is used to get the most recent average to the front end.
+    //  This method is used to get the most recent average and return it to the front end.
     public float GetRecentAverage (){
         return GetDataValue(StatCategories.Average, _recentStatistics);
     }
 
+    //  This method is used to get the most recent strike percentage and return it to the front end.
     public float GetRecentStrikePercentage (){
         return GetDataValue(StatCategories.Strikes, _recentStatistics);
     }
 
+    //  This method is used to get the most recent spare percentage and return it to the front end.
     public float GetRecentSparePercentage (){
         return GetDataValue(StatCategories.Spares, _recentStatistics);
     }
 
+    //  This method is used to return the most recent open frame percentage to the front end.
     public float GetRecentOpenPercentage (){
         return GetDataValue(StatCategories.OpenFrames, _recentStatistics);
     }

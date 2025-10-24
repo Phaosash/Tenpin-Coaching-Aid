@@ -92,6 +92,9 @@
 @code {
     private HomePageManager homePageManager = new HomePageManager();
 
+    //  This method is used to force a UI update after the data has been loaded. Without this
+    //  then the UI wouldn't automatically display the loaded data until something was changed on the page.
+    //  This problem was apparently being caused by a threading issue.
     protected override async Task OnInitializedAsync (){
         await homePageManager.InitialiseDataLoadAsync();
         StateHasChanged();

@@ -5,14 +5,11 @@ using System.Text.Json;
 
 namespace BowlingCoacher.Backend.Classes;
 
-public class ApiClient {
-    private readonly HttpClient _http;
+public class ApiClient (HttpClient http){
+    private readonly HttpClient _http = http;
     private const string BaseRoute = "api/scores";
 
-    public ApiClient (HttpClient http){
-        _http = http;
-    }
-
+    //  This method is used to get get a json response via the API.
     public async Task<IEnumerable<GameStatistics>?> GetAllAsync (){
         try {
             return await _http.GetFromJsonAsync<IEnumerable<GameStatistics>>(BaseRoute);
@@ -28,6 +25,7 @@ public class ApiClient {
         }
     }
 
+    //  This method is used to get a json response from an API based off the supplied ID.
     public async Task<GameStatistics?> GetByIdAsync (int id){
         try {
             return await _http.GetFromJsonAsync<GameStatistics>($"{BaseRoute}/{id}");
@@ -41,6 +39,7 @@ public class ApiClient {
         return null;
     }
 
+    //  This method is used to create a new record via the API.
     public async Task<GameStatistics?> CreateAsync (GameStatistics stats){
         try {
             var response = await _http.PostAsJsonAsync(BaseRoute, stats);
@@ -57,6 +56,7 @@ public class ApiClient {
         return null;
     }
 
+    //  This method is used to update an existing data record based on the supplied ID and the modified data.
     public async Task<bool> UpdateAsync (int id, GameStatistics stats){
         try {
             var response = await _http.PutAsJsonAsync($"{BaseRoute}/{id}", stats);
@@ -72,6 +72,7 @@ public class ApiClient {
         }
     }
 
+    //  This method is used to tell the API to delete a record based off the supplied ID.
     public async Task<bool> DeleteAsync (int id){
         try {
             var response = await _http.DeleteAsync($"{BaseRoute}/{id}");
